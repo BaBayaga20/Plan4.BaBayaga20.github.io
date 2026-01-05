@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modulo 4</title>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .card { margin-bottom: 20px; border: 1px solid #dee2e6; }
+    .correcta { color: #198754; font-weight: bold; }
+    .incorrecta { color: #dc3545; font-weight: bold; }
+    .resultado-card { background-color: #e8f5e8; border-left: 4px solid #198754; }
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('imgs/UNAM.jpg');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: contain;
+        opacity: 0.1;
+        z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="text-center mb-4">
+      <h2 class="mb-3">Formulario Practico</h2>
+      <p class="lead">Evaluacion y Mejora continua</p>
+    </div>
+    
+    <div class="card p-4 mb-4">
+      <h5>Instrucciones:</h5>
+      <p>Analice los diez escenarios planteados en el formulario y determine a qué caso corresponde cada uno.</p>
+    </div>
+
+    <form id="quizForm">
+      <div id="preguntasContainer"></div>
+      <button type="submit" class="btn btn-success btn-lg w-100 mt-4">Evaluar</button>
+    </form>
+    <div id="resultado" class="mt-4"></div>
+  </div>
+
+  <script>
+    const preguntas = [
+      {
+        texto: "La percepción de la participación en un grupo es considerada un:",
+        opciones: [
+          "Indicador cuantitativo",
+          "Indicador cualitativo"
+        ],
+        respuesta: 1
+      },
+      {
+        texto: "Las tasas de aprobación por materia son consideradas un:",
+        opciones: [
+          "Indicador cuantitativo",
+          "Indicador cualitativo"
+        ],
+        respuesta: 0
+      },
+      {
+        texto: "La realización de un prueba escrita es considerada un instrumento de evaluación:",
+        opciones: [
+          "Verdadero",
+          "Falso"
+        ],
+        respuesta: 0
+      },
+      {
+        texto: "La revisión de un portafolio durante una entrevista es considerada una técnica de evaluación:",
+        opciones: [
+          "Verdadero",
+          "Falso"
+        ],
+        respuesta: 1
+      },
+      {
+        texto: "La realización de registros durante la labor de observación es considerada una técnica de evaluación:",
+        opciones: [
+          "Verdadero",
+          "Falso"
+        ],
+        respuesta: 1
+      },
+      {
+        texto: "Seleccione de las siguientes, cual es una herramienta para calendarizar:",
+        opciones: [
+          "Diagrama de Vonn Neumann",
+          "Diagrama de Flujo",
+          "Diagrama de Gantt",
+          "Diagrama de Venn"
+        ],
+        respuesta: 2
+      },
+      {
+        texto: "La obtención de una retroalimentación por cada instrumento de evaluación realizado no es importante:",
+        opciones: [
+          "Verdadero",
+          "Falso"
+        ],
+        respuesta: 1
+      },
+      {
+        texto: "Durante los procesos de Evaluación y Mejora continua se considera que un objetivo importante a alcanzar es:",
+        opciones: [
+          "Dificultar la toma de decisiones",
+          "Mejorar la eficiencia y la calidad",
+          "Fomentar un entorno de aprendizaje complejo y sumamente competitivo",
+          "Establecer criterios de evaluación cambiantes y personalizados"
+        ],
+        respuesta: 1
+      },
+      {
+        texto: "Cual de los siguientes no es un objetivo a alcanzar durante los procesos de Evaluación y Mejora continua:",
+        opciones: [
+          "Dinamizar la forma de evaluar",
+          "Promover la adaptación al entorno",
+          "Facilitar la toma de desciones informada",
+          "Fomentar la innovación y el aprendizaje organizacional"
+        ],
+        respuesta: 0
+      },
+      {
+        texto: "Planear, Verificar, Hacer, Actuar son los pasos a seguir durante los procesos de Gestión de la calidad:",
+        opciones: [
+          "Verdadero",
+          "Falso"
+        ],
+        respuesta: 1
+      }
+    ];
+
+    let preguntasMezcladas = [];
+
+    // Mezclar array (Fisher-Yates shuffle)
+    function mezclar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Renderizar preguntas en orden aleatorio
+    function renderPreguntas() {
+      const container = document.getElementById("preguntasContainer");
+      container.innerHTML = "";
+      preguntasMezcladas = mezclar([...preguntas]);
+
+      preguntasMezcladas.forEach((pregunta, index) => {
+        const card = document.createElement("div");
+        card.className = "card p-4";
+        card.innerHTML = `
+          <p class="fw-bold">${index + 1}. ${pregunta.texto}</p>
+          ${pregunta.opciones.map((op, opIndex) => `
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="pregunta${index}" value="${opIndex}" required>
+              <label class="form-check-label">${op}</label>
+            </div>
+          `).join("")}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Validar respuestas
+    document.getElementById("quizForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      const inputs = document.querySelectorAll("input[type=radio]:checked");
+      
+      if (inputs.length < preguntas.length) {
+        alert(`Por favor responde todas las preguntas. Te faltan ${preguntas.length - inputs.length} preguntas.`);
+        return;
+      }
+
+      let correctas = 0;
+      let desgloseDetallado = "";
+
+      preguntasMezcladas.forEach((pregunta, index) => {
+        const seleccionada = document.querySelector(`input[name=pregunta${index}]:checked`);
+        const respuestaUsuario = parseInt(seleccionada.value);
+        const esCorrecta = respuestaUsuario === pregunta.respuesta;
+
+        if (esCorrecta) {
+          correctas++;
+        }
+
+        const letras = ["A", "B", "C", "D"];
+        desgloseDetallado += `
+          <div class="card p-3 mb-3 ${esCorrecta ? 'resultado-card' : ''}">
+            <div class="d-flex justify-content-between align-items-start">
+              <strong>Pregunta ${index + 1}</strong>
+              <span class="badge ${esCorrecta ? 'bg-success' : 'bg-danger'}">
+                ${esCorrecta ? '✓ Correcta' : '✗ Incorrecta'}
+              </span>
+            </div>
+            <p class="mb-1">${pregunta.texto}</p>
+            <p class="mb-1">Tu respuesta: <span class="${esCorrecta ? 'correcta' : 'incorrecta'}">${letras[respuestaUsuario]}) ${pregunta.opciones[respuestaUsuario]}</span></p>
+            ${!esCorrecta ? `<p class="mb-0">Respuesta correcta: <span class="correcta">${letras[pregunta.respuesta]}) ${pregunta.opciones[pregunta.respuesta]}</span></p>` : ""}
+          </div>
+        `;
+      });
+
+      const porcentajeTotal = Math.round((correctas / preguntas.length) * 100);
+      
+      // Determinar calificación final
+      let calificacion = "";
+      let colorCalificacion = "";
+      if (porcentajeTotal >= 90) {
+        calificacion = "Excelente";
+        colorCalificacion = "success";
+      } else if (porcentajeTotal >= 70) {
+        calificacion = "Satisfactorio";
+        colorCalificacion = "primary";
+      } else if (porcentajeTotal >= 60) {
+        calificacion = "Suficiente";
+        colorCalificacion = "warning";
+      } else {
+        calificacion = "Insuficiente";
+        colorCalificacion = "danger";
+      }
+
+      document.getElementById("resultado").innerHTML = `
+        <div class="card">
+          <div class="card-header bg-${colorCalificacion} text-white">
+            <h4 class="mb-0">Resultados de la Evaluación</h4>
+          </div>
+          <div class="card-body">
+            <div class="row text-center mb-4">
+              <div class="col-md-4">
+                <h3 class="text-${colorCalificacion}">${porcentajeTotal}%</h3>
+                <p class="mb-0">Calificación Final</p>
+              </div>
+              <div class="col-md-4">
+                <h3>${correctas}/${preguntas.length}</h3>
+                <p class="mb-0">Respuestas Correctas</p>
+              </div>
+              <div class="col-md-4">
+                <h3 class="text-${colorCalificacion}">${calificacion}</h3>
+                <p class="mb-0">Desempeño</p>
+              </div>
+            </div>
+
+            <h5>Revisión Detallada:</h5>
+            ${desgloseDetallado}
+
+            <div class="text-center mt-4">
+              <button type="button" class="btn btn-outline-primary" onclick="location.reload()">
+                Realizar Otra Evaluación
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Scroll to results
+      document.getElementById("resultado").scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Inicializar
+    renderPreguntas();
+  </script>
+</body>
+</html>
